@@ -1,0 +1,15 @@
+# Dependencias de Node (Carpeta pesada que se regenera con npm install)
+node_modules/
+
+# Archivos de registro/logs de errores
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables de entorno (Contiene contraseñas y credenciales de la BD de Postgres)
+.env
+.env.local
+
+# Archivos específicos del sistema operativo o editores
+.DS_Store
+.vscode/
