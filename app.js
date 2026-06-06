@@ -1,43 +1,68 @@
 const express = require('express');
-const empleados = require('./ejemplo'); // Tu archivo con la conexión a la base de datos
 const app = express();
 const PORT = 3000;
 
+// Importar el enrutador de empleados
+const empleadosRouter = require('./routes/empleados.router');
+
 app.use(express.json());
 
-// --- ENDPOINTS ---dasd
+// Vincular el enrutador a la ruta base que quieras
+// Esto hace que automáticamente todo lo que esté dentro de 'empleadosRouter' comience con /api/empleado
+app.use('/api/empleado', empleadosRouter);
 
-// 1. GET: Obtener todos los empleados directamente de la Base de Datos
-app.get('/api/empleado', async (req, res) => {
-    try {
-        // Ejecutamos la función asíncrona esperando su resultado
-        const listaEmpleados = await empleados.obtenerUsuarios();
-        res.status(200).json(listaEmpleados);
-    } catch (error) {
-        res.status(500).json({ error: "Error interno al obtener los empleados" });
+
+const nuevoEmpleado = {
+    nombre: "Carlos Ortega",
+    puesto: "Desarrollador Backend",
+    salario: 45000
+};
+
+fetch('http://localhost:3000/api/empleado', {
+    method: 'POST', // 1. Especificar el método HTTP
+    headers: {
+        'Content-Type': 'application/json' // 2. Indicar al servidor que enviamos JSON
+    },
+    body: JSON.stringify(nuevoEmpleado) // 3. Convertir el objeto JS a una cadena JSON
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error(`Error en la petición: ${response.status}`);
     }
+    return response.json(); // Convertir la respuesta del servidor a objeto JS
+})
+.then(data => {
+    console.log('Empleado registrado con éxito:', data);
+})
+.catch(error => {
+    console.error('Hubo un fallo al enviar los datos:', error);
 });
 
-// 2. GET: Obtener un empleado específico por su ID
-app.get('/api/empleado/:id', async (req, res) => {
-    const id_emp = parseInt(req.params.id);
 
+
+
+async function crearEmpleado(empleado) {
     try {
-        const listaEmpleados = await empleados.obtenerUsuarios();
-        console.log(listaEmpleados)
-        const empleado_espe = listaEmpleados.find(r => r.employee_id === id_emp);
+        const respuesta = await fetch('http://localhost:3000/api/empleado', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(empleado)
+        });
 
-        if (!empleado_espe) {
-            return res.status(404).json({ error: "Empleado no encontrado" });
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
         }
-        
-        res.status(200).json(empleado_espe);
-    } catch (error) {
-        res.status(500).json({ error: "Error interno al buscar el empleado" });
-    }
-});
 
-// Iniciamos el servidor
+        const datosServidor = await respuesta.json();
+        console.log('Respuesta:', datosServidor);
+    } catch (error) {
+        console.error('Error al guardar:', error);
+    }
+}
+
+crearEmpleado(nuevoEmpleado);
 app.listen(PORT, () => {
     console.log(`API ejecutándose en http://localhost:${PORT}`);
 });
