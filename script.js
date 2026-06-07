@@ -1,10 +1,10 @@
 
 const nuevoEmpleado = {
-    salario: 444,
-    ape: "Ortega",
-    nombre: "Carlos",
+    employeeId: 444,
+    lastName: "Ortega",
+    firstName: "Carlos",
 
-    puesto: "Desarrollador Backend",
+    title: "Desarrollador Backend",
     
 
 };
@@ -63,3 +63,40 @@ boton2.addEventListener("click", () =>  {
     
     eliminar(nuevoEmpleado.salario);
 });
+
+
+const cambiosEmpleado = {
+    title: "Senior Backend eveloper",
+    lastName: "arizona",
+    firstName: "jose e."
+    
+};
+
+async function acctualizar(id, nuevos) {
+    try {
+        const respuesta = await fetch(`http://localhost:3000/api/empleado/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            }, body: JSON.stringify(nuevos)
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        console.log('actualizado:', datosServidor);
+    } catch (error) {
+        console.error('Error al eliminar:', error);
+    }
+}
+
+const boton3 = document.getElementById("32");
+boton3.addEventListener("click", () =>  {
+    
+    acctualizar(444,cambiosEmpleado);
+});
+
+
+

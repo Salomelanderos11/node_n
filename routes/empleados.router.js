@@ -61,7 +61,20 @@ router.delete('/:id',async (req, res)=> {
     } catch (error) {
         res.status(500).json({ error: "Error interno al eliminar el empleado//" });
     }
-})
+});
+
+router.patch('/:id', async (req, res) => {
+    const id = req.params.id;
+    const body = req.body; 
+    if (isNaN(id) || body == null ) return res.status(400).json({ error: "Datos inválidos" });
+    try {
+        const respuesta = await empleados.actualizacionParcial(id,body);
+        res.status(200).json({respuesta: respuesta, msj:"datos actualizados"})
+    } catch (error) {
+        res.status(500).json({ error: "Error interno al eliminar el empleado//" });
+    }
+
+});
 
 
 
