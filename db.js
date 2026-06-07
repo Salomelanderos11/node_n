@@ -9,15 +9,19 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const obtenerUsuarios = async () => {
-  const sql = 'SELECT * FROM employees';
+// Función para realizar consultas
+const query = async (text, params) => {
+  const start = Date.now();
   try {
-    const resultado = await pool.query(sql);
-    return resultado.rows;
+    const res = await pool.query(text, params);
+    const duration = Date.now() - start;
+    console.log('Consulta ejecutada en', duration, 'ms');
+    return res;
   } catch (error) {
-    console.error('Error en la base de datos:', error.message);
+    console.error('Error en la consulta:', error.message);
     throw error;
   }
 };
 
-module.exports = { obtenerUsuarios };
+module.exports = { query };
+
