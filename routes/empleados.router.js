@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const empleados = require('../ejemplo'); // Ajusta la ruta si lo metes en una carpeta
+const empleados = require('../baseD/employees'); // Ajusta la ruta si lo metes en una carpeta
 
 // NOTA: Aquí ya no usas 'app.get', usas 'router.get'
 // Tampoco repites '/api/empleado', dejas solo la raíz '/' o el parámetro '/:id'
@@ -69,7 +69,7 @@ router.patch('/:id', async (req, res) => {
     if (isNaN(id) || body == null ) return res.status(400).json({ error: "Datos inválidos" });
     try {
         const respuesta = await empleados.actualizacionParcial(id,body);
-        res.status(200).json({respuesta: respuesta, msj:"datos actualizados"})
+        res.status(200).json({respuesta: respuesta})
     } catch (error) {
         res.status(500).json({ error: "Error interno al eliminar el empleado//" });
     }

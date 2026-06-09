@@ -23,7 +23,14 @@ async function crearEmpleado(empleado) {
         }
 
         const datosServidor = await respuesta.json();
-        console.log('Respuesta:', datosServidor);
+        let respuesta_ser;
+        if(datosServidor.respuesta){
+            respuesta_ser = datosServidor.respuesta.exito == true ?  datosServidor.respuesta.mesaje : "Error al insertar los datos";
+        }
+        else{
+            respuesta_ser = datosServidor.error;
+        }
+        console.log('Respuesta:', respuesta_ser);
     } catch (error) {
         console.error('Error al guardar:', error);
     }
@@ -59,16 +66,17 @@ async function eliminar(id) {
 
 const boton2 = document.getElementById("22");
 boton2.addEventListener("click", () =>  {
-    console.log(nuevoEmpleado.salario);
+    console.log(nuevoEmpleado.employeeId);
     
-    eliminar(nuevoEmpleado.salario);
+    eliminar(nuevoEmpleado.employeeId);
 });
 
 
 const cambiosEmpleado = {
     title: "Senior Backend eveloper",
     lastName: "arizona",
-    firstName: "jose e."
+    firstName: "jose e.",
+    birthDate:"1948-12-07"
     
 };
 
@@ -86,9 +94,11 @@ async function acctualizar(id, nuevos) {
         }
 
         const datosServidor = await respuesta.json();
-        console.log('actualizado:', datosServidor);
+        console.log(datosServidor);
+        const mesaje = datosServidor.respuesta.exito == true ? ("Se han actualizados los datos",datosServidor.respuesta.msj): "Error :" + datosServidor.respuesta.msj
+        console.log(mesaje);
     } catch (error) {
-        console.error('Error al eliminar:', error);
+        console.error('Error al actualizar:', error);
     }
 }
 
@@ -100,3 +110,8 @@ boton3.addEventListener("click", () =>  {
 
 
 
+
+
+a= {"employee_id":444,"last_name":"arizona","first_name":"jose e.","title":"Senior Backend eveloper","title_of_courtesy":null,"birth_date":null,"hire_date":null,"address":null,"city":null,"region":null,"postal_code":null,"country":null,"home_phone":null,"extension":null,"photo":null,"notes":null,"reports_to":null,"photo_path":null}
+
+console.log(Object.keys(a))

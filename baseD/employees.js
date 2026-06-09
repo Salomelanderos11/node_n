@@ -74,12 +74,12 @@ const params = Object.values(emple_n);
         console.log('Inserción correcta en PostgreSQL');
         return {
             exito: true,
-            datos: resultado.rows[0]
+            msj: "Datos insertados correctamente"
         };
     }    
   } catch (err) {
     console.error('La consulta falló de forma interna:', err.message);
-    return { exito: false, error: err.message };
+    return { exito: false, msj: err.message };
   }
 }
 
@@ -97,19 +97,20 @@ async function actualizacionParcial(id,params) {
   }).join(', ');
   
   
-  const sql = `update employees set ${columnsql} where employee_id = $${columnas.length + 1} RETURNING *`;
+  const sql = `update employees set ${columnsql} where employee_id = $${columnas.length + 1} returning*`;
   valores.push(id);
   
   try {
     const resultado = await db.query(sql, valores);
+   // console.log(resultado.rowCount)
     if (resultado.rowCount > 0) {
-      return { exito: true, datos: resultado.rows[0] };
+      return { exito: true, msj: ("Se han actualizado los datos :" , params) };
     } else {
-      return { exito: false, mensaje: "El empleado no existe" };
+      return { exito: false, msj: "El empleado no existe" };
     }  
   } catch (err) {
     console.error('La consulta falló de forma interna:', err.message);
-    return { exito: false, error: err.message };
+    return { exito: false, msj: err.message };
   }
 }
 
