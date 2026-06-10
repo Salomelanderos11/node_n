@@ -115,3 +115,75 @@ boton3.addEventListener("click", () =>  {
 a= {"employee_id":444,"last_name":"arizona","first_name":"jose e.","title":"Senior Backend eveloper","title_of_courtesy":null,"birth_date":null,"hire_date":null,"address":null,"city":null,"region":null,"postal_code":null,"country":null,"home_phone":null,"extension":null,"photo":null,"notes":null,"reports_to":null,"photo_path":null}
 
 console.log(Object.keys(a))
+
+const productos = [
+    {"product_id": 11, "quantity": 5},
+    {"product_id": 42, "quantity": 1}
+]
+
+const valores = [
+  'VINET',        
+    5,              
+    '2026-06-09',   
+    '2026-07-09',   
+    null,           
+    3,              
+    32.38,          
+    'Vins et alcools Chevalier', 
+    '59 rue de l Abbaye',       
+    'Reims',        
+    null,           
+    '51100',        
+    'France',   
+  JSON.stringify(productos) // El array se convierte en string JSON y Postgres lo recibe como jsonb
+];
+
+
+
+async function registrarventa(venta) {
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/ventas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(venta)
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        console.log(datosServidor);
+        let respuesta_ser;
+        if(datosServidor.respuesta){
+            respuesta_ser = datosServidor.respuesta.exito == true ?  datosServidor.respuesta.mesaje : "Error al insertar los datos";
+        }
+        else{
+            respuesta_ser = datosServidor.error;
+        }
+        console.log('Respuesta:', respuesta_ser);
+    } catch (error) {
+        console.error('Error al guardar:', error);
+    }
+}
+console.log(valores)
+registrarventa(valores);
+/*
+CALL insertar_orden_calculada(
+    'VINET',        -- customer_id
+    5,              -- employee_id
+    '2026-06-09',   -- order_date
+    '2026-07-09',   -- required_date
+    NULL,           -- shipped_date
+    3,              -- ship_via
+    32.38,          -- freight
+    'Vins et alcools Chevalier', 
+    '59 rue de l''Abbaye',       
+    'Reims',        
+    NULL,           
+    '51100',        
+    'France',       
+    '[{"product_id": 11, "quantity": 12}, {"product_id": 42, "quantity": 5}]'::jsonb
+);*/
