@@ -66,9 +66,9 @@ async function eliminar(id) {
 
 const boton2 = document.getElementById("22");
 boton2.addEventListener("click", () =>  {
-    console.log(nuevoEmpleado.employeeId);
+    //console.log(nuevoEmpleado.employeeId);
     
-    eliminar(nuevoEmpleado.employeeId);
+   // eliminar(nuevoEmpleado.employeeId);
 });
 
 
@@ -105,7 +105,7 @@ async function acctualizar(id, nuevos) {
 const boton3 = document.getElementById("32");
 boton3.addEventListener("click", () =>  {
     
-    acctualizar(444,cambiosEmpleado);
+   // acctualizar(444,cambiosEmpleado);
 });
 
 
@@ -117,14 +117,13 @@ a= {"employee_id":444,"last_name":"arizona","first_name":"jose e.","title":"Seni
 console.log(Object.keys(a))
 
 const productos = [
-    {"product_id": 11, "quantity": 5},
-    {"product_id": 42, "quantity": 1}
+    {"product_id": 11, "quantity": 5,"discount": 0.15},
+    {"product_id": 42, "quantity": 1,"discount":0.1}
 ]
 
 const valores = [
   'VINET',        
-    5,              
-    '2026-06-09',   
+    5,   
     '2026-07-09',   
     null,           
     3,              
@@ -168,8 +167,8 @@ async function registrarventa(venta) {
         console.error('Error al guardar:', error);
     }
 }
-console.log(valores)
-registrarventa(valores);
+//console.log(valores)
+
 /*
 CALL insertar_orden_calculada(
     'VINET',        -- customer_id
@@ -187,3 +186,86 @@ CALL insertar_orden_calculada(
     'France',       
     '[{"product_id": 11, "quantity": 12}, {"product_id": 42, "quantity": 5}]'::jsonb
 );*/
+
+//const boton3 = document.getElementById("32");
+boton3.addEventListener("click", () =>  {
+    registrarventa(valores);
+   // acctualizar(444,cambiosEmpleado);
+});
+
+
+
+
+async function eliminarorden(venta) {
+    try {
+        const respuesta = await fetch(`http://localhost:3000/api/ventas/${venta}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log("oks2")
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        console.log(datosServidor);
+        let respuesta_ser;
+        if(datosServidor.respuesta){
+            respuesta_ser = datosServidor.respuesta.exito == true ?  datosServidor.respuesta.mensaje : "Error al insertar los datos";
+            console.log('Respuesta:', respuesta_ser);
+        }
+        else{
+
+            respuesta_ser = datosServidor.error;
+            console.log('Respuesta:', respuesta_ser);
+        }
+        console.log('Respuesta:', respuesta_ser);
+    } catch (error) {
+        console.error('Error al guardar:', error);
+    }
+}
+
+boton2.addEventListener("click", () =>  {
+    //console.log(nuevoEmpleado.employeeId);
+    
+    eliminarorden(11078);
+});
+
+
+
+
+
+
+
+
+
+
+const productos = [
+    {"product_id": 11, "quantity": 5,"discount": 0.15},
+    {"product_id": 42, "quantity": 1,"discount":0.1}
+]
+
+async function acctualizar_orden(id, nuevos) {
+    try {
+        const respuesta = await fetch(`http://localhost:3000/api/empleado/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            }, body: JSON.stringify(nuevos)
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        console.log(datosServidor);
+        const mesaje = datosServidor.respuesta.exito == true ? ("Se han actualizados los datos",datosServidor.respuesta.msj): "Error :" + datosServidor.respuesta.msj
+        console.log(mesaje);
+    } catch (error) {
+        console.error('Error al actualizar:', error);
+    }
+}
