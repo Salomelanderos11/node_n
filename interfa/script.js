@@ -241,12 +241,12 @@ boton2.addEventListener("click", () =>  {
 
 
 
-
+/*
 
 const productos = [
     {"product_id": 11, "quantity": 5,"discount": 0.15},
     {"product_id": 42, "quantity": 1,"discount":0.1}
-]
+]*/
 
 async function acctualizar_orden(id, nuevos) {
     try {

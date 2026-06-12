@@ -2,9 +2,10 @@ const db = require('./db');
 
 
 async function obtenerventas() {
-    const sql = `select o.order_id,o.order_date, o.employee_id, od.product_id, od.unit_price,od.quantity, od.discount, o.customer_id from order_details od inner join orders o on o.order_id = od.order_id
-group by o.order_id, od.product_id,od.unit_price,od.quantity,od.discount, o.customer_id
-order by o.order_id, o.order_date`
+    const sql = `select o.order_id,o.order_date, o.employee_id, p.product_name, od.unit_price,od.quantity, od.discount, o.customer_id from order_details od inner join orders o on o.order_id = od.order_id    
+                 inner join products p on p.product_id = od.product_id
+group by o.order_id, p.product_name,od.unit_price,od.quantity,od.discount, o.customer_id
+order by o.order_date desc,o.order_id`
     try {
         const resultado = await db.query(sql);
         console.log(resultado.rows)
@@ -104,140 +105,59 @@ async function eliminarorden(id) {
   }
 }
 
+
+
 const productos = [
-    {"product_id": 11, "quantity": 5,"discount": 0.15},
-    {"product_id": 42, "quantity": 1,"discount":0.1}
+    {"product_id": 11, "quantity": 0,"discount": 0.15},
+    {"product_id": 42, "quantity": 0,"discount":0.1}
     
 ]
 
 
 
-async function actualizacionParcial(id,params) {
-    let productos= [];
+async function actualizacionParcial(id, params) {
+    const productos = [];
     const columnas = Object.keys(params[0]).slice(1);
-    params.forEach(element => {
-
-        const valores = Object.values(element);
+    
+    params.forEach(elementoParam => {
+        const valores = Object.values(elementoParam);
         productos.push(valores);
     });
-    //console.log(columnas);
-    //console.log(params);
     
-    nproductos= productos.flat(1);
-    //console.log(nproductos);
-  /*const valores = Object.values(params);*/
-    //let sql='begin; ';
     
-    /*console.log(nproductos);
-    productos.forEach(element => {
-        
-        const columnsql = 
-            columnas.map((llave,index)=>  { 
-                
-                const col_tab =  llave;
-                return `${col_tab} = $${index+1+vuelta}`
-            }).join(', ');
-        sql += ` update order_details set ${columnsql} where order_id = $${nproductos.length + 1} and product_id = ${element[0]}; `;
-        vuelta += 3;             
-    });
-    sql +=' commit;'
-*/
-  
-  //console.log("sql :",sql);
-// console.log("procuctos:", productos);
+    let nproductos = productos.flat(1);
+    let sql = ''; 
 
-  //const sql = `update employees set ${columnsql} where employee_id = $${columnas.length + 1} returning*`;
-  //valores.push(id);
-  //nproductos= productos.flat().push(id);
-  
-  try {
-        await db.query(sql);
+    try {
+        await db.query('BEGIN; ');
         let vuelta = 0;
 
-        productos.forEach(element => {
-        element.push(id);
-        const columnsql = 
-            columnas.map((llave,index)=>  { 
-                
-                const col_tab =  llave;
-                return `${col_tab} = $${index+2}`
-            }).join(', ');
-        sql = ` update order_details set ${columnsql} where order_id = $${element.length } and product_id = $1; `;
-        vuelta += 3;   
-       // const valores = element.slice(1);
-        console.log(sql);
-        console.log(element);
-        await db.query(sql,element);          
-        });
+        for (const element of productos)  {
+            element.push(id);
+            const columnsql = 
+                columnas.map((llave, index) => { 
+                    const col_tab = llave;
+                    return `${col_tab} = $${index + 2}`;
+                }).join(', ');
+            
+            sql = ` update order_details set ${columnsql} where order_id = $${element.length} and product_id = $1; `;
+            vuelta += 3;   
+            console.log(sql);
+            console.log(element);
+            
+            await db.query(sql, element);          
+        }
 
-   /* console.log(resultado.rowCount)
-    if (resultado.rowCount > 0) {
-      return { exito: true, msj: ("Se han actualizado los datos :" , params) };
-    } else {
-      return { exito: false, msj: "El empleado no existe" };
-    } */ 
-  await db.query('COMMIT;');
+        await db.query('COMMIT;');
         console.log("Transacción exitosa.");
 
     } catch (error) {
-        // 4. Si CUALQUIER update del bucle falla, cancelamos todo de inmediato
-        await client.query('ROLLBACK;');
+        await db.query('ROLLBACK;');
         console.error("Error en la transacción, se hizo rollback:", error.message);
     }
- 
-    
 }
+//actualizacionParcial(11078,productos);
 
 
 
-async function actualizacionParcial(id,params) {
-    let productos= [];
-    const columnas = Object.keys(params[0]).slice(1);
-    params.forEach(element => {
-
-        const valores = Object.values(element);
-        productos.push(valores);
-    });
-    
-    nproductos= productos.flat(1);
-  try {
-    await db.query('BEGIN; ');
-    let vuelta = 0;
-
-    // Declaramos la variable 'element' con 'const' o 'let' para evitar errores de modo estricto
-    for (const element of productos)  {
-        element.push(id);
-        const columnsql = 
-            columnas.map((llave,index)=>  { 
-                
-                const col_tab =  llave;
-                return `${col_tab} = $${index+2}`
-            }).join(', ');
-        
-        // Asignamos la query a la variable global/externa sql que ya tenías
-        sql = ` update order_details set ${columnsql} where order_id = $${element.length } and product_id = $1; `;
-        vuelta += 3;   
-        console.log(sql);
-        console.log(element);
-        
-        // Este await ahora sí es 100% válido porque está dentro del bucle for...of directo de la función async
-        await db.query(sql,element);          
-    };
-
-    await db.query('COMMIT;');
-    console.log("Transacción exitosa.");
-
-} catch (error) {
-    // Corregido: cambié 'client.query' por 'db.query' para usar tu misma conexión y que no lance "client is not defined"
-    await db.query('ROLLBACK;');
-    console.error("Error en la transacción, se hizo rollback:", error.message);
-}
- 
-    
-}
-
-actualizacionParcial(11078,productos);
-
-
-
-module.exports = {obtenerventas,obtenerventa,insertarventa,eliminarorden}
+module.exports = {obtenerventas,obtenerventa,insertarventa,eliminarorden,actualizacionParcial}

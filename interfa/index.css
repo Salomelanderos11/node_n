@@ -1,0 +1,106 @@
+/* Estilos generales para el cuerpo */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* Separación entre la sección de Empleados y Ventas */
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 1. Aplicando el estilo automático a AMBAS secciones */
+section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  border: 1px solid #e4e6eb;
+}
+
+/* Estilo para los títulos de cada sección */
+.header-seccion h2 {
+  margin: 0 0 5px 0;
+  color: #1a1a1a;
+  font-size: 1.5rem;
+}
+
+.header-seccion p {
+  margin: 0 0 20px 0;
+  color: #65676b;
+  font-size: 0.95rem;
+}
+
+/* 2. Contenedor de las opciones (Grid automático) */
+.contenedor-botones {
+  display: grid;
+  /* Crea columnas automáticas que se adaptan al tamaño de la pantalla */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* 3. Estilo para los "botones" (Tus divs internos) */
+.contenedor-botones .boton {
+  background-color: #f0f2f5;
+  color: #050505;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Efecto visual cuando pasas el mouse por encima */
+.contenedor-botones .boton:hover {
+  background-color: #e4e6eb;
+  transform: translateY(-2px); /* Se eleva un poquito */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* El contenedor "padre" que controla la animación */
+.wrapper-desplegable {
+  display: grid;
+  grid-template-rows: 0fr; /* Empieza completamente cerrado */
+  transition: grid-template-rows 0.4s ease-out; /* Velocidad de la animación */
+  overflow: hidden;
+  margin-top: 0; /* Sin espacio mientras esté cerrado */
+}
+
+/* El "hijo" interno que guarda el diseño real */
+.contenido-desplegable {
+  min-height: 0px; /* Truco necesario para que CSS Grid anime correctamente */
+}
+
+/* ESTA CLASE SE AGREGARÁ CON JAVASCRIPT AL HACER CLIC */
+.wrapper-desplegable.abierto {
+  grid-template-rows: 1fr; /* Se abre al tamaño exacto de su contenido */
+  margin-top: 20px; /* Separa el contenido de los botones al abrirse */
+}
+
+/* Estilo rápido para la tabla interna (solo para que se vea bonita) */
+.tabla-empleados {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f9f9f9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.tabla-empleados th, .tabla-empleados td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e4e6eb;
+}
+.tabla-empleados th {
+  background-color: #007bff;
+  color: white;
+}
