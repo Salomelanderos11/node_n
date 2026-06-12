@@ -18,10 +18,18 @@
                 </table>
             </div>
         </div>*/
-const  ventas =
-[{"order_id":10248,"order_date":"1996-07-04T07:00:00.000Z","employee_id":5,"product_name":"Mozzarella di Giovanni","unit_price":34.8,"quantity":5,"discount":0,"customer_id":"VINET"},{"order_id":10248,"order_date":"1996-07-04T07:00:00.000Z","employee_id":5,"product_name":"Queso Cabrales","unit_price":14,"quantity":12,"discount":0,"customer_id":"VINET"},{"order_id":10248,"order_date":"1996-07-04T07:00:00.000Z","employee_id":5,"product_name":"Singaporean Hokkien Fried Mee","unit_price":9.8,"quantity":10,"discount":0,"customer_id":"VINET"}];
+        
 
 
+const ventasMock = [
+    { "order_id": 10248, "order_date": "1996-07-04T07:00:00.000Z", "employee_id": 5, "product_name": "Mozzarella di Giovanni", "unit_price": 34.8, "quantity": 5, "discount": 0, "customer_id": "VINET" },
+    { "order_id": 10248, "order_date": "1996-07-04T07:00:00.000Z", "employee_id": 5, "product_name": "Queso Cabrales", "unit_price": 14, "quantity": 12, "discount": 0, "customer_id": "VINET" },
+    { "order_id": 10248, "order_date": "1996-07-04T07:00:00.000Z", "employee_id": 5, "product_name": "Singaporean Hokkien Fried Mee", "unit_price": 9.8, "quantity": 10, "discount": 0, "customer_id": "VINET" }
+];
+
+/**
+ * 1. Obtener datos del servidor
+ */
 async function solventas() {
     try {
         const respuesta = await fetch('http://localhost:3000/api/ventas');
@@ -31,83 +39,96 @@ async function solventas() {
         }
 
         const datosServidor = await respuesta.json();
-        console.log(datosServidor);
-        return datosServidor
+        console.log("Datos del servidor recibidos:", datosServidor);
+        return datosServidor;
     } catch (error) {
-        console.error('Error al guardar:', error);
+        // En lugar de ocultar el error, lo propagamos o manejamos para que no rompa la UI
+        console.error('Error al recuperar las ventas:', error.message);
+        return null; 
     }
 }
 
-console.log(solventas());
+// Elementos del DOM (Cambiados nombres de variables para que coincidan con Ventas)
+const botonVer = document.getElementById('btn-ver-empleados'); // Mantiene tu ID actual de HTML
+let seccionLista = document.getElementById("lista-empleados-seccion"); // Mantiene tu ID actual de HTML
 
-const botonVer = document.getElementById('btn-ver-empleados');
-
-let seccionLista = document.getElementById("lista-empleados-seccion");
-
-// 2. Escuchamos el clic en el botón
-
-
-
-
-
-
+/**
+ * 2. Generar Tabla de forma Dinámica
+ */
 function crear_tabla(datos) {
+    // Protección crucial: Si el servidor falló o el array viene vacío, evitamos que la app se caiga
+    if (!datos || !Array.isArray(datos) || datos.length === 0) {
+        seccionLista.innerHTML = `<div class="contenido-desplegable"><h3>No hay registros de ventas disponibles o el servidor está apagado.</h3></div>`;
+        return;
+    }
+
     // 1. Limpiamos la sección por si ya había una tabla vieja cargada
     seccionLista.innerHTML = ""; 
-    console.log(datos);
 
     // 2. Creamos los contenedores principales
     let div2 = document.createElement('div');
     div2.className = "contenido-desplegable";
     
     let h = document.createElement('h3');
-    h.textContent = "Lista de Empleados Activos"; // Le asignamos texto al título
+    h.textContent = "Historial de Ventas Registradas"; // 👈 Corregido el título de la tabla
     
     let tabla = document.createElement('table');
-    tabla.className = "tabla-empleados";
+    tabla.className = "tabla-empleados"; // Conserva tu clase CSS actual
     
     // 3. ENCABEZADOS: Creamos la fila de los títulos (Fila Principal)
     let trEncabezado = document.createElement('tr');
-    const columnas = Object.keys(datos[0]); // Obtenemos las llaves (id, nombre, puesto...)
+    const columnas = Object.keys(datos[0]); // Obtenemos las llaves reales (order_id, product_name...)
     
     columnas.forEach(col => {
         let th = document.createElement('th');
-        th.textContent = col.toUpperCase(); // Convertimos a mayúsculas para estética
+        // Reemplazamos los guiones bajos por espacios para que se vea más limpio en pantalla
+        th.textContent = col.replace('_', ' ').toUpperCase(); 
         trEncabezado.appendChild(th);
     });
-    tabla.appendChild(trEncabezado); // Metemos los encabezados a la tabla
+    tabla.appendChild(trEncabezado);
 
-    // 4. DATOS: Recorremos cada empleado del array para crear sus filas de datos
-    datos.forEach(empleado => {
-        let trDatos = document.createElement('tr'); // Una fila por cada empleado
+    // 4. DATOS: Recorremos cada registro de venta
+    datos.forEach(venta => {
+        let trDatos = document.createElement('tr');
         
         columnas.forEach(col => {
             let td = document.createElement('td');
-            td.textContent = empleado[col]; // Accedemos al valor dinámicamente
+            let valor = venta[col];
+
+            // Formateo estético opcional: Si es la fecha ISO, la hacemos legible
+            if (col === 'order_date' && valor) {
+                valor = new Date(valor).toLocaleDateString();
+            }
+
+            td.textContent = valor;
             trDatos.appendChild(td);
         });
         
-        tabla.appendChild(trDatos); // Añadimos la fila de datos a la tabla
+        tabla.appendChild(trDatos);
     });
 
-    // 5. INSERCIÓN EN EL DOM (Respetando tu orden de jerarquía)
+    // 5. INSERCIÓN EN EL DOM
     div2.appendChild(h);
     div2.appendChild(tabla);
     seccionLista.appendChild(div2);
 }
 
+/**
+ * 3. Event Listener del Botón con protección asíncrona
+ */
+botonVer.addEventListener('click', async () => {
+    // Si la sección ya está abierta, simplemente la cerramos sin volver a llamar a la API
+    if (seccionLista.classList.contains('abierto')) {
+        seccionLista.classList.remove('abierto');
+        return;
+    }
 
-
-
-botonVer.addEventListener('click',async () => {
-    // toggle() hace magia: si la clase 'abierto' no está, la pone; si ya está, la quita.
-    let ab = await solventas();
-     crear_tabla(ab);
-    seccionLista.classList.toggle('abierto');
-
+    // Si está cerrada, llamamos al servidor
+    let listadoVentas = await solventas();
+    
+    // Le pasamos los datos del servidor. Si dio error (null), la función mostrará un mensaje elegante
+    crear_tabla(listadoVentas);
+    
+    // Mostramos la sección animada por CSS
+    seccionLista.classList.add('abierto');
 });
-
-
-//crear_tabla(ventas);
-
-       // 1. Guardamos el botón y la sección oculta en variables

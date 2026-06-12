@@ -1,163 +1,129 @@
 const db = require('./db');
 
-
 async function obtenerventas() {
-    const sql = `select o.order_id,o.order_date, o.employee_id, p.product_name, od.unit_price,od.quantity, od.discount, o.customer_id from order_details od inner join orders o on o.order_id = od.order_id    
-                 inner join products p on p.product_id = od.product_id
-group by o.order_id, p.product_name,od.unit_price,od.quantity,od.discount, o.customer_id
-order by o.order_date desc,o.order_id`
+    const sql = `
+        SELECT o.order_id, o.order_date, o.employee_id, p.product_name, 
+               od.unit_price, od.quantity, od.discount, o.customer_id 
+        FROM order_details od 
+        INNER JOIN orders o ON o.order_id = od.order_id     
+        INNER JOIN products p ON p.product_id = od.product_id
+        GROUP BY o.order_id, p.product_name, od.unit_price, od.quantity, od.discount, o.customer_id
+        ORDER BY o.order_date DESC, o.order_id`;
+        
     try {
         const resultado = await db.query(sql);
-        console.log(resultado.rows)
-        return resultado.rows;
+        return resultado.rows; 
     } catch (error) {
-        console.error("No se pudo obtener las ventas: ",error.messge)
-        throw error;
+        console.error("Error en la capa de datos (obtenerventas): ", error.message);
+        throw error; 
     }
-    
 }
+
 async function obtenerventa(folio) {
-    const sql = `select o.order_id,o.order_date, o.employee_id, od.product_id, od.unit_price,od.quantity, od.discount, o.customer_id from order_details od inner join orders o on o.order_id = od.order_id
-                where o.order_id = $1   
-                group by o.order_id, od.product_id,od.unit_price,od.quantity,od.discount, o.customer_id
-                order by o.order_id, o.order_date`
-    let params=[folio]
+    const sql = `
+        SELECT o.order_id, o.order_date, o.employee_id, od.product_id, 
+               od.unit_price, od.quantity, od.discount, o.customer_id 
+        FROM order_details od 
+        INNER JOIN orders o ON o.order_id = od.order_id
+        WHERE o.order_id = $1   
+        GROUP BY o.order_id, od.product_id, od.unit_price, od.quantity, od.discount, o.customer_id
+        ORDER BY o.order_id, o.order_date`;
+        
     try {
-        const resultado = await db.query(sql,params);
-        //console.log(resultado.rows)
-        return resultado.rows;
+        const resultado = await db.query(sql, [folio]);
+        return resultado.rows; 
     } catch (error) {
-        console.error("No se pudo obtener las ventas: ",error.messge)
+        console.error(`Error en la capa de datos (obtenerventa - Folio: ${folio}): `, error.message);
         throw error;
     }
-    
-}
-
-async function delete_orden(folio) {
-    //const folio = [folio]
-    const sql = `
-        DO $$
-        BEGIN
-            DELETE FROM order_details WHERE order_id = $1;
-            
-            DELETE FROM orders WHERE order_id = $1;
-
-        EXCEPTION 
-            WHEN OTHERS THEN
-                RAISE EXCEPTION 'No se pudo eliminar la orden. Error: %', SQLERRM;
-        END $$;
-        `;
-    try {
-        const resultado = await db.query(sql,[folio]);
-        if (resultado.rowCount > 0) {
-            console.log(`Orden con ID ${folio} eliminada correctamente.`);
-            return { exito: true, mensaje: "Empleado eliminado" };
-    } else {
-      console.log(`No se encontró ninguna Orden con el ID ${folio}.`);
-      return { exito: false, mensaje: "La Orden no existe" };
-    }
-  } catch (err) {
-    console.error('Error interno al eliminar la orden:', err.message);
-    return { exito: false, error: err.message };
-  }
 }
 
 async function insertarventa(datos) {
     const sql = `SELECT insertar_orden_completa($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) AS nuevo_id`;
-    const params = datos;
-    //console.log(params);
+    
     try {
-    const resultado = await db.query(sql, params);
-    return {
-        exito: true,
-        order_id: resultado.rows[0].nuevo_id
-    };
-  } catch (err) {
-    console.error('Error en la BD al ejecutar la función:', err.message);
-    throw err; 
-  }
+        const resultado = await db.query(sql, datos);
+        
+        if (resultado.rows.length > 0 && resultado.rows[0].nuevo_id) {
+            return {
+                exito: true,
+                order_id: resultado.rows[0].nuevo_id
+            };
+        } else {
+            throw new Error("La base de datos ejecutó la acción pero no retornó un ID válido.");
+        }
+    } catch (error) {
+        console.error('Error en la BD al ejecutar insertar_orden_completa:', error.message);
+        throw error; 
+    }
 }
-
-
 
 async function eliminarorden(id) {
-    const sql = `delete from orders where order_id = $1`;
+    const sql = `DELETE FROM orders WHERE order_id = $1`;
     
-    //console.log(params);
     try {
-    const resultado = await db.query(sql, [id]);
-    
-    if (resultado.rowCount > 0) {
-      return {
-        exito: true,
-        mensaje: `La orden con ID ${id} y sus detalles en cascada fueron eliminados.`
-      };
-    } else {
-
-      return {
-        exito: false,
-        mensaje: `No se encontró ninguna orden con el ID ${id}.`
-      };
+        const resultado = await db.query(sql, [id]);
+        
+        if (resultado.rowCount > 0) {
+            return {
+                exito: true,
+                mensaje: `La orden con ID ${id} y sus detalles asociados fueron eliminados.`
+            };
+        } else {
+            return {
+                exito: false,
+                mensaje: `No se encontró ninguna orden registrada con el ID ${id}.`
+            };
+        }
+    } catch (error) {
+        console.error(`Error en la BD al intentar eliminar la orden ${id}:`, error.message);
+        throw error; 
     }
-  } catch (err) {
-    console.error('Error en la BD al intentar eliminar la orden:', err.message);
-    throw err; 
-  }
 }
-
-
-
-const productos = [
-    {"product_id": 11, "quantity": 0,"discount": 0.15},
-    {"product_id": 42, "quantity": 0,"discount":0.1}
-    
-]
-
-
 
 async function actualizacionParcial(id, params) {
-    const productos = [];
-    const columnas = Object.keys(params[0]).slice(1);
-    
-    params.forEach(elementoParam => {
-        const valores = Object.values(elementoParam);
-        productos.push(valores);
-    });
-    
-    
-    let nproductos = productos.flat(1);
-    let sql = ''; 
+    if (!params || params.length === 0) {
+        return { exito: false, mensaje: "No se proporcionaron productos para actualizar." };
+    }
+
+    const columnas = Object.keys(params[0]).slice(1); 
+    const client = await db.connect(); 
 
     try {
-        await db.query('BEGIN; ');
-        let vuelta = 0;
+        await client.query('BEGIN');
 
-        for (const element of productos)  {
-            element.push(id);
-            const columnsql = 
-                columnas.map((llave, index) => { 
-                    const col_tab = llave;
-                    return `${col_tab} = $${index + 2}`;
-                }).join(', ');
+        for (const producto of params) {
+            const valoresCampos = Object.values(producto); 
+            valoresCampos.push(id); 
+
+            const columnsql = columnas.map((llave, index) => { 
+                return `${llave} = $${index + 2}`; 
+            }).join(', ');
             
-            sql = ` update order_details set ${columnsql} where order_id = $${element.length} and product_id = $1; `;
-            vuelta += 3;   
-            console.log(sql);
-            console.log(element);
-            
-            await db.query(sql, element);          
+            const sql = `UPDATE order_details SET ${columnsql} WHERE order_id = $${valoresCampos.length} AND product_id = $1`;
+            const resultado = await client.query(sql, valoresCampos);
+
+            if (resultado.rowCount === 0) {
+                throw new Error(`El producto con ID ${producto.product_id} no pertenece a la orden ${id}.`);
+            }
         }
 
-        await db.query('COMMIT;');
-        console.log("Transacción exitosa.");
+        await client.query('COMMIT');
+        return { exito: true, mensaje: "Todos los productos de la orden fueron actualizados con éxito." };
 
     } catch (error) {
-        await db.query('ROLLBACK;');
-        console.error("Error en la transacción, se hizo rollback:", error.message);
+        await client.query('ROLLBACK');
+        console.error("Transacción abortada. Se ejecutó ROLLBACK exitosamente. Motivo:", error.message);
+        return { exito: false, error: error.message };
+    } finally {
+        client.release(); 
     }
 }
-//actualizacionParcial(11078,productos);
 
-
-
-module.exports = {obtenerventas,obtenerventa,insertarventa,eliminarorden,actualizacionParcial}
+module.exports = {
+    obtenerventas,
+    obtenerventa,
+    insertarventa,
+    eliminarorden,
+    actualizacionParcial
+};

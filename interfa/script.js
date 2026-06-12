@@ -1,271 +1,192 @@
+// =========================================================================
+// 🎯 CONFIGURACIÓN DE DATOS DE PRUEBA (MOCKS)
+// =========================================================================
 
 const nuevoEmpleado = {
     employeeId: 444,
     lastName: "Ortega",
     firstName: "Carlos",
-
-    title: "Desarrollador Backend",
-    
-
+    title: "Desarrollador Backend"
 };
+
+const cambiosEmpleado = {
+    title: "Senior Backend Developer",
+    lastName: "Arizona",
+    firstName: "Jose E.",
+    birthDate: "1948-12-07"
+};
+
+const productosVenta = [
+    { "product_id": 11, "quantity": 5, "discount": 0.15 },
+    { "product_id": 42, "quantity": 1, "discount": 0.1 }
+];
+
+// 💡 Postgres espera un objeto JSON para mapear los parámetros $1, $2, etc., en req.body
+const nuevaVenta = {
+    customer_id: 'VINET',
+    employee_id: 5,
+    order_date: null, // Lo maneja CURRENT_DATE automáticamente
+    required_date: '2026-07-09',
+    shipped_date: null,
+    ship_via: 3,
+    freight: 32.38,
+    ship_name: 'Vins et alcools Chevalier',
+    ship_address: '59 rue de l Abbaye',
+    ship_city: 'Reims',
+    ship_region: null,
+    ship_postal_code: '51100',
+    ship_country: 'France',
+    detalles: productosVenta // El Router o driver PG se encargarán de procesarlo como JSONB
+};
+
+// =========================================================================
+// 👥 MÓDULO: EMPLEADOS (FETCHES)
+// =========================================================================
+
+/**
+ * 1. Crear Empleado (POST)
+ */
 async function crearEmpleado(empleado) {
     try {
         const respuesta = await fetch('http://localhost:3000/api/empleado', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(empleado)
         });
 
+        const datosServidor = await respuesta.json();
+
         if (!respuesta.ok) {
-            throw new Error(`HTTP error! status: ${respuesta.status}`);
+            // Si el router arrojó un error controlado (ej. ID duplicado)
+            throw new Error(datosServidor.error || `HTTP error! status: ${respuesta.status}`);
         }
 
-        const datosServidor = await respuesta.json();
-        let respuesta_ser;
-        if(datosServidor.respuesta){
-            respuesta_ser = datosServidor.respuesta.exito == true ?  datosServidor.respuesta.mesaje : "Error al insertar los datos";
-        }
-        else{
-            respuesta_ser = datosServidor.error;
-        }
-        console.log('Respuesta:', respuesta_ser);
+        // Como aplanamos la respuesta en el router, leemos directo .mensaje
+        console.log('Resultado del Servidor:', datosServidor.mensaje || "Empleado creado con éxito");
     } catch (error) {
-        console.error('Error al guardar:', error);
+        console.error('Error al guardar el empleado:', error.message);
     }
 }
 
-const boton = document.getElementById("12");
-boton.addEventListener("click", () =>  {
-    console.log("d")
-    crearEmpleado(nuevoEmpleado);
-});
-
-
-
-async function eliminar(id) {
+/**
+ * 2. Eliminar Empleado (DELETE)
+ */
+async function eliminarEmpleado(id) {
     try {
         const respuesta = await fetch(`http://localhost:3000/api/empleado/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            method: 'DELETE'
         });
 
+        const datosServidor = await respuesta.json();
+
         if (!respuesta.ok) {
-            throw new Error(`HTTP error! status: ${respuesta.status}`);
+            throw new Error(datosServidor.error || `HTTP error! status: ${respuesta.status}`);
         }
 
-        const datosServidor = await respuesta.json();
-        console.log('Eliminado con exito:', datosServidor);
+        console.log('Eliminado con éxito:', datosServidor.mensaje);
     } catch (error) {
-        console.error('Error al eliminar:', error);
+        console.error('Error al eliminar el empleado:', error.message);
     }
 }
 
-const boton2 = document.getElementById("22");
-boton2.addEventListener("click", () =>  {
-    //console.log(nuevoEmpleado.employeeId);
-    
-   // eliminar(nuevoEmpleado.employeeId);
-});
-
-
-const cambiosEmpleado = {
-    title: "Senior Backend eveloper",
-    lastName: "arizona",
-    firstName: "jose e.",
-    birthDate:"1948-12-07"
-    
-};
-
-async function acctualizar(id, nuevos) {
+/**
+ * 3. Actualizar Empleado (PATCH)
+ */
+async function actualizarEmpleado(id, nuevosCambios) {
     try {
         const respuesta = await fetch(`http://localhost:3000/api/empleado/${id}`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            }, body: JSON.stringify(nuevos)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevosCambios)
         });
 
+        const datosServidor = await respuesta.json();
+
         if (!respuesta.ok) {
-            throw new Error(`HTTP error! status: ${respuesta.status}`);
+            throw new Error(datosServidor.error || `HTTP error! status: ${respuesta.status}`);
         }
 
-        const datosServidor = await respuesta.json();
-        console.log(datosServidor);
-        const mesaje = datosServidor.respuesta.exito == true ? ("Se han actualizados los datos",datosServidor.respuesta.msj): "Error :" + datosServidor.respuesta.msj
-        console.log(mesaje);
+        // Corregido: Quitamos el operador ternario roto con comas
+        console.log("Servidor dice:", datosServidor.mensaje);
+        console.log("Datos actualizados:", datosServidor.datos);
     } catch (error) {
-        console.error('Error al actualizar:', error);
+        console.error('Error al actualizar el empleado:', error.message);
     }
 }
 
-const boton3 = document.getElementById("32");
-boton3.addEventListener("click", () =>  {
-    
-   // acctualizar(444,cambiosEmpleado);
-});
+// =========================================================================
+// 📦 MÓDULO: VENTAS (FETCHES)
+// =========================================================================
 
-
-
-
-
-a= {"employee_id":444,"last_name":"arizona","first_name":"jose e.","title":"Senior Backend eveloper","title_of_courtesy":null,"birth_date":null,"hire_date":null,"address":null,"city":null,"region":null,"postal_code":null,"country":null,"home_phone":null,"extension":null,"photo":null,"notes":null,"reports_to":null,"photo_path":null}
-
-console.log(Object.keys(a))
-
-const productos = [
-    {"product_id": 11, "quantity": 5,"discount": 0.15},
-    {"product_id": 42, "quantity": 1,"discount":0.1}
-]
-
-const valores = [
-  'VINET',        
-    5,   
-    '2026-07-09',   
-    null,           
-    3,              
-    32.38,          
-    'Vins et alcools Chevalier', 
-    '59 rue de l Abbaye',       
-    'Reims',        
-    null,           
-    '51100',        
-    'France',   
-  JSON.stringify(productos) // El array se convierte en string JSON y Postgres lo recibe como jsonb
-];
-
-
-
-async function registrarventa(venta) {
+/**
+ * 4. Registrar una Venta Completa (POST)
+ */
+async function registrarVenta(venta) {
     try {
         const respuesta = await fetch('http://localhost:3000/api/ventas', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(venta)
         });
 
-        if (!respuesta.ok) {
-            throw new Error(`HTTP error! status: ${respuesta.status}`);
-        }
-
         const datosServidor = await respuesta.json();
-        console.log(datosServidor);
-        let respuesta_ser;
-        if(datosServidor.respuesta){
-            respuesta_ser = datosServidor.respuesta.exito == true ?  datosServidor.respuesta.mesaje : "Error al insertar los datos";
-        }
-        else{
-            respuesta_ser = datosServidor.error;
-        }
-        console.log('Respuesta:', respuesta_ser);
-    } catch (error) {
-        console.error('Error al guardar:', error);
-    }
-}
-//console.log(valores)
-
-/*
-CALL insertar_orden_calculada(
-    'VINET',        -- customer_id
-    5,              -- employee_id
-    '2026-06-09',   -- order_date
-    '2026-07-09',   -- required_date
-    NULL,           -- shipped_date
-    3,              -- ship_via
-    32.38,          -- freight
-    'Vins et alcools Chevalier', 
-    '59 rue de l''Abbaye',       
-    'Reims',        
-    NULL,           
-    '51100',        
-    'France',       
-    '[{"product_id": 11, "quantity": 12}, {"product_id": 42, "quantity": 5}]'::jsonb
-);*/
-
-//const boton3 = document.getElementById("32");
-boton3.addEventListener("click", () =>  {
-    registrarventa(valores);
-   // acctualizar(444,cambiosEmpleado);
-});
-
-
-
-
-async function eliminarorden(venta) {
-    try {
-        const respuesta = await fetch(`http://localhost:3000/api/ventas/${venta}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        console.log("oks2")
 
         if (!respuesta.ok) {
-            throw new Error(`HTTP error! status: ${respuesta.status}`);
+            throw new Error(datosServidor.error || `HTTP error! status: ${respuesta.status}`);
         }
 
-        const datosServidor = await respuesta.json();
-        console.log(datosServidor);
-        let respuesta_ser;
-        if(datosServidor.respuesta){
-            respuesta_ser = datosServidor.respuesta.exito == true ?  datosServidor.respuesta.mensaje : "Error al insertar los datos";
-            console.log('Respuesta:', respuesta_ser);
-        }
-        else{
-
-            respuesta_ser = datosServidor.error;
-            console.log('Respuesta:', respuesta_ser);
-        }
-        console.log('Respuesta:', respuesta_ser);
+        console.log('¡Venta realizada con éxito!');
+        console.log('ID de orden generada:', datosServidor.order_id);
     } catch (error) {
-        console.error('Error al guardar:', error);
+        console.error('Error al guardar la venta:', error.message);
     }
 }
 
-boton2.addEventListener("click", () =>  {
-    //console.log(nuevoEmpleado.employeeId);
-    
-    eliminarorden(11078);
-});
-
-
-
-
-
-
-
-
-/*
-
-const productos = [
-    {"product_id": 11, "quantity": 5,"discount": 0.15},
-    {"product_id": 42, "quantity": 1,"discount":0.1}
-]*/
-
-async function acctualizar_orden(id, nuevos) {
+/**
+ * 5. Eliminar una Orden Completa en Cascada (DELETE)
+ */
+async function eliminarOrden(idVenta) {
     try {
-        const respuesta = await fetch(`http://localhost:3000/api/empleado/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            }, body: JSON.stringify(nuevos)
+        const respuesta = await fetch(`http://localhost:3000/api/ventas/${idVenta}`, {
+            method: 'DELETE'
         });
 
+        const datosServidor = await respuesta.json();
+
         if (!respuesta.ok) {
-            throw new Error(`HTTP error! status: ${respuesta.status}`);
+            throw new Error(datosServidor.error || `HTTP error! status: ${respuesta.status}`);
         }
 
-        const datosServidor = await respuesta.json();
-        console.log(datosServidor);
-        const mesaje = datosServidor.respuesta.exito == true ? ("Se han actualizados los datos",datosServidor.respuesta.msj): "Error :" + datosServidor.respuesta.msj
-        console.log(mesaje);
+        console.log('Servidor dice:', datosServidor.mensaje);
     } catch (error) {
-        console.error('Error al actualizar:', error);
+        console.error('Error al eliminar la orden:', error.message);
     }
+}
+
+// =========================================================================
+// 🔘 ASIGNACIÓN DE BOTONES (LISTENERS)
+// =========================================================================
+
+const boton1 = document.getElementById("12");
+if (boton1) {
+    boton1.addEventListener("click", () => {
+        console.log("Botón 1 presionado: Creando empleado...");
+        crearEmpleado(nuevoEmpleado);
+    });
+}
+
+const boton2 = document.getElementById("22");
+if (boton2) {
+    boton2.addEventListener("click", () => {
+        console.log("Botón 2 presionado: Eliminando orden...");
+        eliminarOrden(11078); // Cambia el número por el ID que gustes probar
+    });
+}
+
+const boton3 = document.getElementById("32");
+if (boton3) {
+    boton3.addEventListener("click", () => {
+        console.log("Botón 3 presionado: Registrando venta...");
+        registrarVenta(nuevaVenta);
+    });
 }

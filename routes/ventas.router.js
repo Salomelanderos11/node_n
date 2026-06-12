@@ -2,86 +2,109 @@ const express = require('express');
 const router = express.Router();
 const ventas = require('../baseD/ventas');
 
+function manejarErroresPostgres(error, res) {
+    console.error("Detalle del error en BD:", error);
+
+    if (error.code === '23503') {
+        return res.status(400).json({ error: "Operación inválida. El cliente, empleado o producto especificado no existe en el sistema." });
+    }
+    if (error.code === '23502') {
+        return res.status(400).json({ error: `El campo obligatorio [${error.column}] está vacío o ausente.` });
+    }
+    if (error.code === '22P02') {
+        return res.status(400).json({ error: "Formato de datos incorrecto detectado por la base de datos." });
+    }
+
+    return res.status(500).json({ error: "Ocurrió un error inesperado en el servidor." });
+}
+
 router.get('/', async (req, res) => {
     try {
         const listaventas = await ventas.obtenerventas();     
-        res.status(200).json(listaventas);
+        res.status(200).json(listaventas); 
     } catch (error) {
-        res.status(500).json({error: "Error interno al obtener las ventas" })
+        res.status(500).json({ error: "Error interno al recuperar el listado de ventas." });
     }
 });
+
 router.get('/:folio', async (req, res) => {
-    const folio =parseInt( req.params.folio);
-    if (isNaN(folio)) return res.status(400).json({ error: "ID inválido" });
+    const folio = parseInt(req.params.folio, 10);
+    if (isNaN(folio)) {
+        return res.status(400).json({ error: "El folio proporcionado debe ser un valor numérico válido." });
+    }
+
     try {
         const venta = await ventas.obtenerventa(folio);
-        if(!venta){     
-            return res.status(400).json("Orden no encontrada");
+        
+        if (!venta || venta.length === 0) {     
+            return res.status(404).json({ error: `La orden con el folio [${folio}] no fue encontrada.` });
         }
+        
         res.status(200).json(venta);
     } catch (error) {
-        res.status(500).json({error: "Error interno al buscar la orden" })
+        res.status(500).json({ error: "Error interno al buscar la orden solicitada." });
     }
 });
 
 router.post('/', async (req, res) => {
-    const datos =req.body;
-     
-    //console.log(datos);
-   // res.status(200).json({exito:datos});
+    const datos = req.body;
+    
+    if (!datos || Object.keys(datos).length === 0) {
+        return res.status(400).json({ error: "El cuerpo de la petición no contiene datos para procesar." });
+    }
+    if (!datos.detalles || !Array.isArray(datos.detalles) || datos.detalles.length === 0) {
+        return res.status(400).json({ error: "No puedes registrar una venta sin añadir artículos en los detalles." });
+    }
+
     try {
-        console.log("ok1");
         const respuesta = await ventas.insertarventa(datos);
-        //console.log("respuesta");
-        if(respuesta){     
-            //res.status(200).json("Orden no encontrada");
-            res.status(200).json({exito : respuesta});
-            console.log("insertado")
-        }
-        
+        res.status(201).json(respuesta); 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({error: "Error al ejecutar la consulta de insercion" })
+        manejarErroresPostgres(error, res);
     }
 });
-
 
 router.delete('/:id', async (req, res) => {
-    console.log("oks1");
-    const datos =req.params.id;
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+        return res.status(400).json({ error: "El ID a eliminar debe ser un valor numérico." });
+    }
      
-    //console.log(datos);
-   // res.status(200).json({exito:datos});
     try {
-        const respuesta = await ventas.eliminarorden(datos);
-        //console.log("respuesta");
-        if(respuesta.exito == true){
-            return res.status(200).json({exito : true, mensaje: "Orden eliminada correctamente."});
-
-        }else{
-            res.status(200).json(respuesta);
-        }
+        const respuesta = await ventas.eliminarorden(id);
         
+        if (respuesta.exito === true) {
+            return res.status(200).json(respuesta);
+        } else {
+            return res.status(404).json(respuesta);
+        }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({error: "Error al ejecutar la consulta de eliminación" })
+        manejarErroresPostgres(error, res);
     }
 });
-
-
 
 router.patch('/:id', async (req, res) => {
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
     const body = req.body; 
-    if (isNaN(id) || body == null ) return res.status(400).json({ error: "Datos inválidos" });
-    try {
-        const respuesta = await empleados.actualizacionParcial(id,body);
-        res.status(200).json({respuesta: respuesta})
-    } catch (error) {
-        res.status(500).json({ error: "Error interno al eliminar el empleado//" });
+
+    if (isNaN(id)) {
+        return res.status(400).json({ error: "El ID de la orden debe ser numérico." });
+    }
+    if (!body || !Array.isArray(body) || body.length === 0) {
+        return res.status(400).json({ error: "Debes enviar un arreglo con los productos que deseas actualizar." });
     }
 
+    try {
+        const respuesta = await ventas.actualizacionParcial(id, body);
+        
+        if (respuesta.exito === true) {
+            return res.status(200).json(respuesta);
+        } else {
+            return res.status(400).json({ error: respuesta.error });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Error interno al intentar actualizar los productos de la orden." });
+    }
 });
-
 
 module.exports = router;
