@@ -27,6 +27,18 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.post('/intervalo', async (req, res) => {
+    const fechas= req.body;
+    console.log(fechas,22);
+    try {
+        const listaventas = await ventas.obtenerventas_intervalo(fechas);     
+        res.status(200).json(listaventas); 
+    } catch (error) {
+        res.status(500).json({ error: "Error interno al recuperar el listado de ventas.",capa: 2});
+    }
+});
+
+
 router.get('/:folio', async (req, res) => {
     const folio = parseInt(req.params.folio, 10);
     if (isNaN(folio)) {

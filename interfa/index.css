@@ -95,12 +95,84 @@ section {
   border-radius: 6px;
   overflow: hidden;
 }
-.tabla-empleados th, .tabla-empleados td {
+.tabla-empleados th {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #e4e6eb;
 }
+
+.tabla-empleados td {
+  max-width: 5%;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #809ada;
+  background-color: var(--color-alerta, #e4e6eb);
+}
+
 .tabla-empleados th {
   background-color: #007bff;
   color: white;
+}
+
+
+
+.dataTables_wrapper {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* Evitar que textos gigantescos deformen las celdas */
+.tabla-empleados th, 
+.tabla-empleados td {
+    max-width: 200px; /* Ajusta según consideres */
+    white-space: nowrap; /* Evita que el texto salte de línea bruscamente */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Si el texto no cabe, añade "..." al final */
+    padding: 12px 10px !important; /* Controla el espaciado interno (alto de fila) */
+}
+
+/* Si tu tabla llega a tener 15 o 20 columnas, esto evitará que se salga de la tarjeta */
+.contenido-desplegable {
+    overflow-x: auto; /* Agrega scroll horizontal interno SOLO si es necesario */
+}
+
+
+
+
+/* Cambiar el color de fondo del encabezado de DataTables */
+table.dataTable thead th {
+    background-color: #007bff !important; /* Tu azul primario */
+    color: white !important;
+    border-bottom: 2px solid #0056b3 !important;
+    text-align: left;
+}
+
+/* Color para las filas alternas (Efecto Cebra) */
+table.dataTable tbody tr:nth-child(even) {
+    background-color: #f8f9fa !important;
+}
+
+/* Cambiar el diseño del buscador y el selector de cantidad */
+.dataTables_filter input {
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+    padding: 6px !important;
+    outline: none;
+}
+.dataTables_filter input:focus {
+    border-color: #007bff !important; /* Brillo azul al clickear el buscador */
+}
+
+/* Personalizar los botones de paginación (Siguiente, Anterior, Números) */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #007bff !important;
+    color: white !important;
+    border-radius: 6px !important;
+    border: 1px solid #007bff !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #0056b3 !important;
+    color: white !important;
+    border-radius: 6px !important;
 }

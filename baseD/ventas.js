@@ -1,14 +1,36 @@
 const db = require('./db');
 
+
+
+function obtener_fecha() {
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');    
+    return `${año}-${mes}-${dia}`;
+}
+
+
+
+
 async function obtenerventas() {
-    const sql = `
-        SELECT o.order_id, o.order_date, o.employee_id, p.product_name, 
+    //const año = new Date().getFullYear(); 
+    const sql = `select o.order_id , o.customer_id, o.employee_id, o.order_date, o.required_date, o.ship_name,count(od.order_id) as "total articulos" , sum(od.quantity*(1-od.discount)* p.unit_price) as Total from orders o
+                    inner join order_details od on od.order_id = o.order_id
+                    inner join products p on p.product_id = od.product_id
+                    where date_part('year',order_date) =  date_part('year',current_date)
+                    group by  o.order_id , o.customer_id, o.employee_id, o.order_date, o.required_date, o.ship_name
+                    order by order_date desc`;
+    /**
+     * SELECT o.order_id, o.order_date, o.employee_id, p.product_name, 
                od.unit_price, od.quantity, od.discount, o.customer_id 
         FROM order_details od 
         INNER JOIN orders o ON o.order_id = od.order_id     
         INNER JOIN products p ON p.product_id = od.product_id
         GROUP BY o.order_id, p.product_name, od.unit_price, od.quantity, od.discount, o.customer_id
-        ORDER BY o.order_date DESC, o.order_id`;
+        ORDER BY o.order_date DESC, o.order_id
+     * 
+     */
         
     try {
         const resultado = await db.query(sql);
@@ -27,7 +49,7 @@ async function obtenerventa(folio) {
         INNER JOIN orders o ON o.order_id = od.order_id
         WHERE o.order_id = $1   
         GROUP BY o.order_id, od.product_id, od.unit_price, od.quantity, od.discount, o.customer_id
-        ORDER BY o.order_id, o.order_date`;
+        ORDER BY  o.order_date,o.order_id`;
         
     try {
         const resultado = await db.query(sql, [folio]);
@@ -120,10 +142,32 @@ async function actualizacionParcial(id, params) {
     }
 }
 
+async function obtenerventas_intervalo(fechas) {
+    const sql = `
+        SELECT o.order_id, o.order_date, o.employee_id, p.product_name, 
+               od.unit_price, od.quantity, od.discount, o.customer_id 
+        FROM order_details od 
+        INNER JOIN orders o ON o.order_id = od.order_id     
+        INNER JOIN products p ON p.product_id = od.product_id
+        where o.order_date between  $1 and $2
+        GROUP BY o.order_id, p.product_name, od.unit_price, od.quantity, od.discount, o.customer_id
+        ORDER BY o.order_date DESC, o.order_id`;
+        
+    try {
+        const resultado = await db.query(sql, fechas);
+        return resultado.rows; 
+    } catch (error) {
+        console.error("Error al jecutar consulta de intervalo: ", error.message, 1);
+        throw error; 
+    }
+}
+
+
+
 module.exports = {
     obtenerventas,
     obtenerventa,
     insertarventa,
     eliminarorden,
-    actualizacionParcial
+    actualizacionParcial,obtenerventas_intervalo
 };
