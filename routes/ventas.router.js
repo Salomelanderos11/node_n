@@ -18,24 +18,24 @@ function manejarErroresPostgres(error, res) {
     return res.status(500).json({ error: "Ocurrió un error inesperado en el servidor." });
 }
 
+
+
 router.get('/', async (req, res) => {
     try {
-        const listaventas = await ventas.obtenerventas();     
-        res.status(200).json(listaventas); 
-    } catch (error) {
-        res.status(500).json({ error: "Error interno al recuperar el listado de ventas." });
-    }
-});
 
-router.post('/intervalo', async (req, res) => {
-    const fechas= req.body;
-    console.log(fechas,22);
-    try {
-        const listaventas = await ventas.obtenerventas_intervalo(fechas);     
-        res.status(200).json(listaventas); 
+        const{ fecha_inicio , fecha_fin }= req.query;
+        console.log(fecha_inicio,fecha_fin,22);
+        if(inicio && fin){
+            const listaventas = await ventas.obtenerventas_intervalo([fecha_inicio , fecha_fin]);     
+            return res.status(200).json(listaventas);
+        }    
+                 
+            const listaventas = await ventas.obtenerventas();     
+            res.status(200).json(listaventas);
     } catch (error) {
-        res.status(500).json({ error: "Error interno al recuperar el listado de ventas.",capa: 2});
+            res.status(500).json({ error: "Error interno al recuperar el listado de ventas."});
     }
+    
 });
 
 

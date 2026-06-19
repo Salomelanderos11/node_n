@@ -21,16 +21,7 @@ async function obtenerventas() {
                     where date_part('year',order_date) =  date_part('year',current_date)
                     group by  o.order_id , o.customer_id, o.employee_id, o.order_date, o.required_date, o.ship_name
                     order by order_date desc`;
-    /**
-     * SELECT o.order_id, o.order_date, o.employee_id, p.product_name, 
-               od.unit_price, od.quantity, od.discount, o.customer_id 
-        FROM order_details od 
-        INNER JOIN orders o ON o.order_id = od.order_id     
-        INNER JOIN products p ON p.product_id = od.product_id
-        GROUP BY o.order_id, p.product_name, od.unit_price, od.quantity, od.discount, o.customer_id
-        ORDER BY o.order_date DESC, o.order_id
-     * 
-     */
+    
         
     try {
         const resultado = await db.query(sql);

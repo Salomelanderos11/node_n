@@ -1,4 +1,6 @@
-/* Estilos generales para el cuerpo */
+/* ==========================================================================
+   1. ESTILOS GENERALES Y ESTRUCTURA (BODY & SECTIONS)
+   ========================================================================== */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f0f2f5;
@@ -6,12 +8,10 @@ body {
   padding: 40px 20px;
   display: flex;
   flex-direction: column;
-  gap: 30px; /* Separación entre la sección de Empleados y Ventas */
-  max-width: 800px;
+  gap: 30px; 
   margin: 0 auto;
 }
 
-/* 1. Aplicando el estilo automático a AMBAS secciones */
 section {
   background-color: #ffffff;
   border-radius: 12px;
@@ -20,7 +20,6 @@ section {
   border: 1px solid #e4e6eb;
 }
 
-/* Estilo para los títulos de cada sección */
 .header-seccion h2 {
   margin: 0 0 5px 0;
   color: #1a1a1a;
@@ -33,15 +32,15 @@ section {
   font-size: 0.95rem;
 }
 
-/* 2. Contenedor de las opciones (Grid automático) */
+/* ==========================================================================
+   2. BOTONES Y NAVEGACIÓN (GRID)
+   ========================================================================== */
 .contenedor-botones {
   display: grid;
-  /* Crea columnas automáticas que se adaptan al tamaño de la pantalla */
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
 }
 
-/* 3. Estilo para los "botones" (Tus divs internos) */
 .contenedor-botones .boton {
   background-color: #f0f2f5;
   color: #050505;
@@ -58,121 +57,147 @@ section {
   justify-content: center;
 }
 
-/* Efecto visual cuando pasas el mouse por encima */
 .contenedor-botones .boton:hover {
   background-color: #e4e6eb;
-  transform: translateY(-2px); /* Se eleva un poquito */
+  transform: translateY(-2px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-
-
-/* El contenedor "padre" que controla la animación */
+/* ==========================================================================
+   3. ANIMACIÓN DEL CONTENEDOR DESPLEGABLE (CSS GRID TRICK)
+   ========================================================================== */
 .wrapper-desplegable {
   display: grid;
-  grid-template-rows: 0fr; /* Empieza completamente cerrado */
-  transition: grid-template-rows 0.4s ease-out; /* Velocidad de la animación */
+  grid-template-rows: 0fr; 
+  transition: grid-template-rows 0.4s ease-out; 
   overflow: hidden;
-  margin-top: 0; /* Sin espacio mientras esté cerrado */
+  margin-top: 0; 
 }
 
-/* El "hijo" interno que guarda el diseño real */
-.contenido-desplegable {
-  min-height: 0px; /* Truco necesario para que CSS Grid anime correctamente */
-}
-
-/* ESTA CLASE SE AGREGARÁ CON JAVASCRIPT AL HACER CLIC */
 .wrapper-desplegable.abierto {
-  grid-template-rows: 1fr; /* Se abre al tamaño exacto de su contenido */
-  margin-top: 20px; /* Separa el contenido de los botones al abrirse */
+  grid-template-rows: 1fr; 
+  margin-top: 20px; 
 }
 
-/* Estilo rápido para la tabla interna (solo para que se vea bonita) */
+.contenido-desplegable {
+  min-height: 0px; 
+  overflow-x: auto; /* Scroll horizontal de seguridad si hay muchas columnas */
+}
+
+/* ==========================================================================
+   4. PERSONALIZACIÓN DE LA TABLA Y DATATABLES
+   ========================================================================== */
 .tabla-empleados {
-  width: 100%;
+  width: 100% !important;
   border-collapse: collapse;
   background: #f9f9f9;
   border-radius: 6px;
   overflow: hidden;
 }
-.tabla-empleados th {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e4e6eb;
-}
 
-.tabla-empleados td {
-  max-width: 5%;
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #809ada;
-  background-color: var(--color-alerta, #e4e6eb);
-}
-
-.tabla-empleados th {
-  background-color: #007bff;
-  color: white;
-}
-
-
-
-.dataTables_wrapper {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 10px;
-}
-
-/* Evitar que textos gigantescos deformen las celdas */
+/* Celdas generales (Fusionado nativo + DataTables) */
 .tabla-empleados th, 
 .tabla-empleados td {
-    max-width: 200px; /* Ajusta según consideres */
-    white-space: nowrap; /* Evita que el texto salte de línea bruscamente */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Si el texto no cabe, añade "..." al final */
-    padding: 12px 10px !important; /* Controla el espaciado interno (alto de fila) */
+  max-width: 200px; 
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis; 
+  padding: 12px 10px !important; 
+  text-align: left;
 }
 
-/* Si tu tabla llega a tener 15 o 20 columnas, esto evitará que se salga de la tarjeta */
-.contenido-desplegable {
-    overflow-x: auto; /* Agrega scroll horizontal interno SOLO si es necesario */
+/* Encabezados de la Tabla */
+table.dataTable thead th,
+.tabla-empleados th {
+  background-color: #007bff !important; 
+  color: white !important;
+  border-bottom: 2px solid #0056b3 !important;
 }
 
-
-
-
-/* Cambiar el color de fondo del encabezado de DataTables */
-table.dataTable thead th {
-    background-color: #007bff !important; /* Tu azul primario */
-    color: white !important;
-    border-bottom: 2px solid #0056b3 !important;
-    text-align: left;
-}
-
-/* Color para las filas alternas (Efecto Cebra) */
+/* Filas alternas (Efecto Cebra) */
 table.dataTable tbody tr:nth-child(even) {
-    background-color: #f8f9fa !important;
+  background-color: #f8f9fa !important;
 }
 
-/* Cambiar el diseño del buscador y el selector de cantidad */
+/* Contenedor wrapper propio de DataTables */
+.dataTables_wrapper {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+/* Buscador de DataTables */
 .dataTables_filter input {
-    border: 1px solid #ccc !important;
-    border-radius: 6px !important;
-    padding: 6px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  padding: 6px !important;
+  outline: none;
+}
+
+.dataTables_filter input:focus {
+  border-color: #007bff !important;
+}
+
+/* Botones de Paginación */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: #007bff !important;
+  color: white !important;
+  border-radius: 6px !important;
+  border: 1px solid #007bff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: #0056b3 !important;
+  color: white !important;
+  border-radius: 6px !important;
+}
+
+.sorting{
+  background-color: chocolate;
+}
+
+
+
+/* --- 1. Color del Encabezado (Th) y Bordes --- */
+table.dataTable thead th {
+    background-color: #42c177 !important; /* Cambia aquí el color (ej: Morado) */
+    color: #ffffff !important;            /* Color del texto del encabezado */
+    font-weight: 600;
+    border-bottom: 3px solid #5a32a3 !important; /* Línea inferior más oscura */
+}
+
+/* --- 2. Efecto Hover (Cuando pasas el mouse por una fila) --- */
+table.dataTable tbody tr:hover {
+    background-color: #f1f0ff !important; /* Color de fondo al resaltar */
+    cursor: pointer;
+}
+
+/* --- 3. Personalizar los Botones de Paginación --- */
+/* Botón de la página actual activa */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #6f42c1 !important;
+    color: white !important;
+    border: 1px solid #6f42c1 !important;
+    border-radius: 4px;
+}
+/* Botones al pasarles el mouse por encima */
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #5a32a3 !important;
+    color: white !important;
+    border-radius: 4px;
+}
+
+/* --- 4. Redondear y dar diseño a la caja de búsqueda --- */
+.dataTables_filter input {
+    border: 2px solid #e4e6eb !important;
+    border-radius: 20px !important; /* Bordes tipo píldora */
+    padding: 6px 15px !important;
     outline: none;
+    transition: all 0.3s ease;
 }
 .dataTables_filter input:focus {
-    border-color: #007bff !important; /* Brillo azul al clickear el buscador */
+    border-color: #6f42c1 !important; /* Cambia de color al dar click */
+    box-shadow: 0 0 5px rgba(111, 66, 193, 0.3);
 }
 
-/* Personalizar los botones de paginación (Siguiente, Anterior, Números) */
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: #007bff !important;
-    color: white !important;
-    border-radius: 6px !important;
-    border: 1px solid #007bff !important;
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #0056b3 !important;
-    color: white !important;
-    border-radius: 6px !important;
-}
+

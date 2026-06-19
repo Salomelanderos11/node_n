@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const empleados = require('../baseD/employees');
+const generador = require('../helpers/generador_links');
+
+const BASE_ENDPOINT = '/api/v1/empleados';
 
 function manejarErroresPostgres(error, res) {
     console.error("Detalle del error en BD:", error);
@@ -20,8 +23,16 @@ function manejarErroresPostgres(error, res) {
 
 router.get('/', async (req, res) => {
     try {
+        let page = parseInt(req.query.page, 10) || 1;
         const listaEmpleados = await empleados.obtenerUsuarios();
-        res.status(200).json(listaEmpleados);
+        const empleados_links = listaEmpleados.map(emp => ({
+            ...emp, 
+            links : generador.generarLinksRecurso(req, BASE_ENDPOINT, emp.employee_id)
+        }));
+        res.status(200).json({
+            data: empleados_links,
+            links : [{ rel: "create", method: "post", href: `${req.protocol}://${req.get('host')}${BASE_ENDPOINT}` }]
+        });
     } catch (error) {
         res.status(500).json({ error: "Error interno al recuperar el listado de empleados." });
     }
@@ -39,7 +50,11 @@ router.get('/:id', async (req, res) => {
         if (!empleado) {
             return res.status(404).json({ error: `El empleado con ID ${id_emp} no fue encontrado.` });
         }
-        res.status(200).json(empleado);
+        
+        res.status(200).json({
+            data: empleado,
+            links: generador.generarLinksRecurso(req, BASE_ENDPOINT, id_emp)
+        });
     } catch (error) {
         res.status(500).json({ error: "Error interno al buscar el empleado solicitado." });
     }
@@ -54,7 +69,11 @@ router.post('/', async (req, res) => {
         
     try {
         const respuesta = await empleados.insertar(parametros);
-        res.status(201).json(respuesta); 
+        
+        res.status(201).json({
+            data: respuesta,
+            links: generador.generarLinksRecurso(req, BASE_ENDPOINT, parametros.employeeId || parametros.employee_id)
+        }); 
     } catch (error) {
         manejarErroresPostgres(error, res);
     }
@@ -70,7 +89,10 @@ router.delete('/:id', async (req, res) => {
         const respuesta = await empleados.delete_user(id);
         
         if (respuesta.exito === true) {
-            return res.status(200).json(respuesta);
+            return res.status(200).json({
+                data: respuesta,
+                links: [{ rel: "collection", method: "get", href: `${req.protocol}://${req.get('host')}${BASE_ENDPOINT}` }]
+            });
         } else {
             return res.status(404).json(respuesta);
         }
@@ -94,7 +116,10 @@ router.patch('/:id', async (req, res) => {
         const respuesta = await empleados.actualizacionParcial(id, body);
         
         if (respuesta.exito === true) {
-            return res.status(200).json(respuesta);
+            return res.status(200).json({
+                data: respuesta,
+                links: generador.generarLinksRecurso(req, BASE_ENDPOINT, id)
+            });
         } else {
             return res.status(404).json(respuesta);
         }

@@ -213,25 +213,17 @@ botonVer.addEventListener('click', async () => {
 function crear_tabla(datos) {
     // 1. Destruir la tabla vieja si ya existía una instancia de DataTable
     // Esto evita el error "Cannot reinitialise DataTable"
+    // 1. CORREGIDO: Si la tabla existe, la destruimos PRIMERO para limpiar la memoria
     if ($.fn.DataTable.isDataTable('#mi-tabla-dinamica')) {
-        // Inicializamos DataTables con control de columnas
-        $('#mi-tabla-dinamica').DataTable({
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
-            pageLength: 5,
-            responsive: true,
-            autoWidth: false, // ¡IMPORTANTE! Desactiva el cálculo automático para que te haga caso
-            /** 
-            columnDefs: [
-                { width: auto, targets: 0 }, // Primera columna (ej: ID) al 10%
-                { width: auto, targets: 1 }, // Segunda columna (ej: Nombre) al 40%
-                { width: auto, targets: 2 }, // Tercera columna (ej: Puesto) al 25%
-                // Puedes usar clases CSS si prefieres no usar porcentajes fijos:
-                { className: 'dt-body-center', targets: [0, 3] } // Centra el contenido de las columnas 0 y 3
-            ]
-                */
-        });
+        $('#mi-tabla-dinamica').DataTable().destroy();
+    }
+
+    // Vaciamos el contenedor HTML
+    seccionLista.innerHTML = ""; 
+
+    if (!datos || datos.length === 0) {
+        seccionLista.innerHTML = "<p>No hay registros disponibles.</p>";
+        return;
     }
 
     seccionLista.innerHTML = ""; 
@@ -298,6 +290,7 @@ botonVer.addEventListener('click', async () => {
     // Si se va a abrir y está vacía, cargamos los datos
     if (seccionLista.classList.contains('abierto')) {
         seccionLista.classList.remove('abierto')
+        document.removeChild
         
         return;
     }
@@ -310,21 +303,17 @@ botonVer.addEventListener('click', async () => {
 
 
 async function interval(f1,f2) {
+    const url = `http://localhost:3000/api/ventas?fecha_inicio=${f1}&fecha_fin=${f2}`
     try {
-        const respuesta = await fetch('http://localhost:3000/api/ventas/intervalo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify([f1,f2])
-        });
+        const respuesta = await fetch(url);
 
         const datosServidor = await respuesta.json();
 
         if (!respuesta.ok) {
             throw new Error(datosServidor.error || `HTTP error! status: ${respuesta.status}`);
         }
-
-        console.log('¡Venta realizada con éxito!');
-        console.log('ID de orden generada:', datosServidor);
+        //console.log(datosServidor);
+        return datosServidor;
     } catch (error) {
         console.error('Error al guardar la venta:', error.message);
     }
@@ -333,4 +322,29 @@ async function interval(f1,f2) {
 
 
 
-//console.log(interval('2026-01-01','2026-06-11'));
+
+console.log(interval('2026-01-01','2026-06-11'));
+
+
+
+
+async function solempl() {
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/v1/empleados');
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        //console.log("Datos del servidor recibidos:", datosServidor);
+        return datosServidor;
+    } catch (error) {
+        // En lugar de ocultar el error, lo propagamos o manejamos para que no rompa la UI
+        console.error('Error al recuperar las ventas:', error.message);
+        return null; 
+    }
+}
+
+
+solempl();
