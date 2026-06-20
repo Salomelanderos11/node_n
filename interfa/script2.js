@@ -18,6 +18,10 @@
                 </table>
             </div>
         </div>*/
+
+
+//        const { json } = require("express");
+
         
 
 
@@ -323,10 +327,6 @@ async function interval(f1,f2) {
 
 
 
-console.log(interval('2026-01-01','2026-06-11'));
-
-
-
 
 async function solempl() {
     try {
@@ -345,6 +345,33 @@ async function solempl() {
         return null; 
     }
 }
+const ncat=
+{
+    
+    nombre: 'abarrotes',
+    descripcion: 'detodo',
+    picture: 10101010100
+  };
 
+async function solcat() {
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/v1/categorias/',{
+            method:"POST",
+            headers:{ 'Content-Type': 'application/json' },
+            body: JSON.stringify(ncat)
+        });
 
-solempl();
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        console.log("Datos del servidor recibidos:", datosServidor);
+        return datosServidor;
+    } catch (error) {
+        // En lugar de ocultar el error, lo propagamos o manejamos para que no rompa la UI
+        console.error('Error al recuperar las ventas:', error.message);
+        return null; 
+    }
+}
+solcat();
