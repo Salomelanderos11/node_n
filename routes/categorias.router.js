@@ -62,5 +62,37 @@ router.post('/', async (req, res) => {
     
 });
 
+router.delete('/:id', async (req, res) => {
+    try {
+
+        const idcat = req.params.id;
+        
+        const catq = await cat.eliminar(idcat);
+        console.log(catq)
+        res.status(200).json({ res: catq })
+
+    } catch (error) {
+            res.status(500).json({ error: "Error interno al eliminar "});
+    }
+    
+});
+
+router.patch('/:id', async (req, res) => {
+    try {
+
+        const idcat = req.params.id;
+        const cate = req.body;
+        console.log(cate);
+        
+        const catq = await cat.actualizacion(idcat,cate);
+        console.log(catq)
+        res.status(200).json({ res: catq })
+ 
+    } catch (error) {
+            res.status(500).json({ error: "Error interno al eliminar "});
+    }
+    
+});
+
 
 module.exports = router;

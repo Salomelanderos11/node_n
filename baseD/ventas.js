@@ -25,6 +25,7 @@ async function obtenerventas() {
         
     try {
         const resultado = await db.query(sql);
+        
         return resultado.rows; 
     } catch (error) {
         console.error("Error en la capa de datos (obtenerventas): ", error.message);

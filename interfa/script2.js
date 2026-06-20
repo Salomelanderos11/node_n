@@ -1,35 +1,4 @@
-/*
-<div class="wrapper-desplegable" id="lista-empleados-seccion">
-            <div class="contenido-desplegable">
-                <h3>Lista de Empleados Activos</h3>
-                <table class="tabla-empleados">
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Puesto</th>
-                    </tr>
-                    <tr>
-                        <td>Juan Pérez</td>
-                        <td>Desarrollador</td>
-                    </tr>
-                    <tr>
-                        <td>María López</td>
-                        <td>Diseñadora UI</td>
-                    </tr>
-                </table>
-            </div>
-        </div>*/
 
-
-//        const { json } = require("express");
-
-        
-
-
-const ventasMock = [
-    { "order_id": 10248, "order_date": "1996-07-04T07:00:00.000Z", "employee_id": 5, "product_name": "Mozzarella di Giovanni", "unit_price": 34.8, "quantity": 5, "discount": 0, "customer_id": "VINET" },
-    { "order_id": 10248, "order_date": "1996-07-04T07:00:00.000Z", "employee_id": 5, "product_name": "Queso Cabrales", "unit_price": 14, "quantity": 12, "discount": 0, "customer_id": "VINET" },
-    { "order_id": 10248, "order_date": "1996-07-04T07:00:00.000Z", "employee_id": 5, "product_name": "Singaporean Hokkien Fried Mee", "unit_price": 9.8, "quantity": 10, "discount": 0, "customer_id": "VINET" }
-];
 
 /**
  * 1. Obtener datos del servidor
@@ -374,4 +343,75 @@ async function solcat() {
         return null; 
     }
 }
-solcat();
+//solcat();
+
+async function delcat() {
+    try {
+        const respuesta = await fetch('http://localhost:3000/api/v1/categorias/9',{
+            method:"DELETE",
+            headers:{ 'Content-Type': 'application/json' }
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        console.log("Datos del servidor recibidos:", datosServidor);
+        return datosServidor;
+    } catch (error) {
+        // En lugar de ocultar el error, lo propagamos o manejamos para que no rompa la UI
+        console.error('Error al recuperar las ventas:', error.message);
+        return null; 
+    }
+}
+
+//delcat()
+
+const ncat2=
+{
+    
+    category_name: 'abarroooootes',
+    description: 'detodo',
+    picture: 10101010100
+  };
+async function accat(id,ncat) {
+    try {
+        const respuesta = await fetch(`http://localhost:3000/api/v1/categorias/${id}`,{
+            method:"PATCH",
+            headers:{ 'Content-Type': 'application/json' },
+            body: JSON.stringify(ncat)
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+
+        const datosServidor = await respuesta.json();
+        console.log("Datos del servidor recibidos:", datosServidor);
+        return datosServidor;
+    } catch (error) {
+        // En lugar de ocultar el error, lo propagamos o manejamos para que no rompa la UI
+        console.error('Error al recuperar las ventas:', error.message);
+        return null; 
+    }
+}
+
+//accat(9,ncat2);
+
+
+const dic={
+  "ID de Cliente": "customer_id",
+  "Nombre de la Empresa": "company_name",
+  "Nombre del Contacto": "contact_name",
+  "Cargo del Contacto": "contact_title",
+  "Dirección": "address",
+  "Ciudad": "city",
+  "Región / Estado": "region",
+  "Código Postal": "postal_code",
+  "País": "country",
+  "Teléfono": "phone",
+  "Fax": "fax"
+}
+a = dic.find()
+console.log()

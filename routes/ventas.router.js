@@ -22,16 +22,18 @@ function manejarErroresPostgres(error, res) {
 
 router.get('/', async (req, res) => {
     try {
-
+        
         const{ fecha_inicio , fecha_fin }= req.query;
-        console.log(fecha_inicio,fecha_fin,22);
-        if(inicio && fin){
-            const listaventas = await ventas.obtenerventas_intervalo([fecha_inicio , fecha_fin]);     
+        //console.log(fecha_inicio,fecha_fin,22);
+        if(fecha_inicio && fecha_fin){
+            
+            const listaventas = await ventas.obtenerventas_intervalo([fecha_inicio , fecha_fin]);  
+              
             return res.status(200).json(listaventas);
         }    
-                 
-            const listaventas = await ventas.obtenerventas();     
-            res.status(200).json(listaventas);
+        const listaventas = await ventas.obtenerventas();     
+            
+        res.status(200).json(listaventas);
     } catch (error) {
             res.status(500).json({ error: "Error interno al recuperar el listado de ventas."});
     }
